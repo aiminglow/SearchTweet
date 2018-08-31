@@ -106,3 +106,6 @@ venv.bak/
 
 # vscode setting
 .vscode/
+
+# test code. store in the other primary repository
+test/
