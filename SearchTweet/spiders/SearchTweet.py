@@ -28,7 +28,7 @@ def prase_tweet_item(items):
 
         #tweet datetime ?which timezone it is?
         tweet['datetime'] = datetime.fromtimestamp(
-            int(item.xpath('.//small[@class="time"]/a/span/@data-time').extract()[0])
+            int(item.xpath('.//small[@class="time"]/a/span/@data-time').extract_first())
             ).strftime('%Y-%m-%d %H:%M:%S')
         
         # tweet text. why the # and @ has space ?     
@@ -50,27 +50,27 @@ def prase_tweet_item(items):
 
         # get user id
         tweet['user_id'] = item.xpath('.//@data-user-id').extract()[0]
-        tweet['usernameTweet'] = item.xpath('.//@data-screen-name').extract()[0]
+        tweet['usernameTweet'] = item.xpath('.//@data-screen-name').extract_first()
 
         # number of reply retweet favorite
         nbr_reply = item.xpath(
-            './/span[@class="ProfileTweet-action--reply u-hiddenVisually"]/span[@class="ProfileTweet-actionCount"]/@data-tweet-stat-count').extract()
+            './/span[@class="ProfileTweet-action--reply u-hiddenVisually"]/span[@class="ProfileTweet-actionCount"]/@data-tweet-stat-count').extract_first()
         if nbr_reply:
-            tweet['nbr_reply'] = int(nbr_reply[0])
+            tweet['nbr_reply'] = int(nbr_reply)
         else:
             tweet['nbr_reply'] = 0
 
         nbr_retweet = item.css('span.ProfileTweet-action--retweet > span.ProfileTweet-actionCount').xpath(
-            '@data-tweet-stat-count').extract()
+            '@data-tweet-stat-count').extract_first()
         if nbr_retweet:
-            tweet['nbr_retweet'] = int(nbr_retweet[0])
+            tweet['nbr_retweet'] = int(nbr_retweet)
         else:
             tweet['nbr_retweet'] = 0
 
         nbr_favorite = item.css('span.ProfileTweet-action--favorite > span.ProfileTweet-actionCount').xpath(
-            '@data-tweet-stat-count').extract()
+            '@data-tweet-stat-count').extract_first()
         if nbr_favorite:
-            tweet['nbr_favorite'] = int(nbr_favorite[0])
+            tweet['nbr_favorite'] = int(nbr_favorite)
         else:
             tweet['nbr_favorite'] = 0
 
@@ -104,9 +104,9 @@ def prase_tweet_item(items):
         if True:
             user = User()
             user['ID'] = tweet['user_id']
-            user['name'] = item.xpath('.//@data-name').extract()[0]
+            user['name'] = item.xpath('.//@data-name').extract_first()
             user['screen_name'] = tweet['usernameTweet']
-            user['avatar'] = item.xpath('.//img[@class="avatar js-action-profile-avatar"]/@src').extract()
+            user['avatar'] = item.xpath('.//img[@class="avatar js-action-profile-avatar"]/@src').extract_first()
 
 
         yield item
