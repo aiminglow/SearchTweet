@@ -14,12 +14,23 @@ BOT_NAME = 'SearchTweet'
 SPIDER_MODULES = ['SearchTweet.spiders']
 NEWSPIDER_MODULE = 'SearchTweet.spiders'
 
+LOG_LEVEL = 'DEBUG'
+
+ITEM_PIPELINES = {
+    'SearchTweet.pipelines.SaveToFilePipeline':100,
+    #'SearchTweet.pipelines.SaveToMongoPipeline':100, # replace `SaveToFilePipeline` with this to use MongoDB
+    #'SearchTweet.pipelines.SavetoMySQLPipeline':100, # replace `SaveToFilePipeline` with this to use MySQL
+}
+
+# settings for where to save data on disk
+SAVE_TWEET_PATH = './Data/tweet/'
+SAVE_USER_PATH = './Data/user/'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'SearchTweet (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
