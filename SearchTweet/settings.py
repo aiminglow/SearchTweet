@@ -14,6 +14,9 @@ BOT_NAME = 'SearchTweet'
 SPIDER_MODULES = ['SearchTweet.spiders']
 NEWSPIDER_MODULE = 'SearchTweet.spiders'
 
+LOG_ENABLED = True
+LOG_FILE = './log/debug.log'
+LOG_ENCODING = 'UTF-8'
 LOG_LEVEL = 'DEBUG'
 
 ITEM_PIPELINES = {
@@ -21,6 +24,21 @@ ITEM_PIPELINES = {
     #'SearchTweet.pipelines.SaveToMongoPipeline':100, # replace `SaveToFilePipeline` with this to use MongoDB
     #'SearchTweet.pipelines.SavetoMySQLPipeline':100, # replace `SaveToFilePipeline` with this to use MySQL
 }
+
+DEFAULT_REQUEST_HEADERS = {
+    'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    'Accept-Language': "zh-CN,zh;q=0.9,en;q=0.8",
+    "Accept-Encoding":"gzip, deflate, br",
+    #"Connection":"keep-alive",
+    #"Host":"baidu.cn",
+    #"Referer":"http://ris.szpl.gov.cn/bol/projectdetail.aspx",
+    "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/68.0.3440.106 Chrome/68.0.3440.106 Safari/537.36",
+    #"Origin":"http://baidu.com",
+    'Upgrade-Insecure-Requests':'1',
+    'Content-Type':'application/x-www-form-urlencoded'}
+
+DEFAULT_COOKIE = ['_twitter_sess=BAh7CSIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%250ASGFzaHsABjoKQHVzZWR7ADoPY3JlYXRlZF9hdGwrCAstgJ5lAToMY3NyZl9p%250AZCIlNTJkOWY0N2E0NDg1ZGVmMDM0ZGE4MmRkYzYxZDJmZGU6B2lkIiUyZDc2%250AMTYwOGRlYzM5NDRiYWY3NTQ4ZmQ0YzU3NjAwMw%253D%253D--6306899c4c1dee1bfe6f19c8b4e47193f286e0df; Path=/; Domain=.twitter.com; Secure; HTTPOnly']
+
 
 # settings for where to save data on disk
 SAVE_TWEET_PATH = './Data/tweet/'

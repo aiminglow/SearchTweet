@@ -15,14 +15,14 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 
-
+loggger = logging.getLogger(__name__)
 
 class SearchTweet(CrawlSpider):
 
     name = 'search_tweet'
     allowed_domains = ['twitter.com']
 
-    def __init__(self, query='A股', lang='', crawl_user=False, top_tweet=False):
+    def __init__(self, query='A股 since:2018-01-01 until:2018-06-01', lang='', crawl_user=True, top_tweet=False):
         
         self.query = query
         self.url = "https://twitter.com/i/search/timeline?l={}".format(lang)
@@ -36,15 +36,16 @@ class SearchTweet(CrawlSpider):
 
     def start_requests(self):
         url = self.url % (quote(self.query), '')
+        #url = self.url % (self.query, '')
         yield  http.Request(url, 
                             meta={'proxy' : 'http://127.0.0.1:8118'},
                             headers=settings['DEFAULT_REQUEST_HEADERS'],
-                            cookies=settings['DEFAULT_COOKIE'],
+                            #cookies=settings['DEFAULT_COOKIE'],
                             callback=self.parse_page)
     
     def parse_page(self, response):
         # handle current page
-        data = json.loads(response.body.decode('utf-8'))
+        data = json.loads(response.body, encoding='utf-8')
         for item in self.prase_tweets_block(data['items_html']):
             yield item
         
@@ -54,13 +55,13 @@ class SearchTweet(CrawlSpider):
         yield http.Request(url,
                             meta={'proxy' : 'http://127.0.0.1:8118'},
                             headers=settings['DEFAULT_REQUEST_HEADERS'],
-                            cookies=settings['DEFAULT_COOKIE'],
+                            #cookies=settings['DEFAULT_COOKIE'],
                             callback=self.parse_page)
 
 
     def prase_tweets_block(self, html_page):
-        page = Selector(html_page)
-        items = page.xpath('//li[@data-item-type="tweet"]/div').extract()
+        page = Selector(text=html_page)
+        items = page.xpath('//li[@data-item-type="tweet"]/div')
         for item in self.prase_tweet_item(items):
             yield item
 
@@ -152,7 +153,8 @@ class SearchTweet(CrawlSpider):
                 tweet['sumurl'] = sumurl
 
             # only crawl top tweet
-            
+            yield tweet
+
             # crawl_user
             if self.crawl_user:
                 user = User()
@@ -161,5 +163,6 @@ class SearchTweet(CrawlSpider):
                 user['screen_name'] = tweet['usernameTweet']
                 user['avatar'] = item.xpath('.//img[@class="avatar js-action-profile-avatar"]/@src').extract_first()
 
+                yield user
 
-            yield item
+            

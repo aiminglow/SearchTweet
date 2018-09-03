@@ -109,3 +109,9 @@ venv.bak/
 
 # test code. store in the other primary repository
 test/
+
+# tweet data
+Data/
+
+# log folder
+log/

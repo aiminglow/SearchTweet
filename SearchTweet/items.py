@@ -29,9 +29,6 @@ class Tweet(Item):
     has_video = Field() # True/False, whether a tweet contains videos
     videos = Field()    # a list of video urls
 
-    has_media = Field() # True/False, whether a tweet contains media (e.g. summary)
-    medias = Field()    # a list of media
-
     has_summary = Field() # True/False,ahether atweet contains summarycard
     sumfullcard = Field() # a list of summarycard's title,summary,domain,picture
     sumurl = Field()      # a list of summarycard's url
