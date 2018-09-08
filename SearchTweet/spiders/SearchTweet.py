@@ -139,10 +139,10 @@ class SearchTweet(CrawlSpider):
                 tweet['images'] = images
 
             # videos
-            videos = item.xpath('.//video/@src').extract()
-            if videos:
-                tweet['has_video'] = True
-                tweet['videos'] = videos
+            # videos = item.xpath('.//video/@src').extract()
+            # if videos:
+            #     tweet['has_video'] = True
+            #     tweet['videos'] = videos
 
             # summary card
             sumfullcard = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-full-card-iframe-url').extract()
