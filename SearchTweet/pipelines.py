@@ -6,11 +6,57 @@ from SearchTweet.items import Tweet, User
 import os
 import logging
 import json
+import mysql.connector
+from mysql.connector import errorcode
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 logger = logging.getLogger(__name__)
+
+class SaveToMySqlPipeline(object):
+
+    def __init__(self):
+        user = settings["MYSQLUSER"]
+        pwd = settings["MYSQLPWD"]
+        self.conn = mysql.connector.connect(user=user, password=pwd, 
+         host="localhost", database="spider_data", buffered=True)
+        self.cur = self.conn.cursor()
+
+    def find_one_tweet(self, tweet_id):
+        query_tweet_sql = "select tweet_id from search_tweet where tweet_id='"+ tweet_id +"'"
+        try:
+            id = self.cur.execute(query_tweet_sql)
+        except mysql.connector.Error as err:
+            return False
+        
+        if(None == id):
+            return False
+        else:
+            return True
+        
+    def insert_one_tweet(self, item:Tweet):
+        
+        if(None == item["tweet_id"]):
+            return None
+        insert_tweet_sql = ""
+        try:
+
+    def find_one_user(self, user_id):
+        query_user_sql = "select user_id from tweet_user where user_id='"+ user_id +"'"
+        try:
+            id = self.cur.execute(query_user_sql)
+        except mysql.connector.Error as err:
+            return False
+        
+        if(None == id):
+            return False
+        else:
+            return True
+
+    def insert_one_user(self, User):
+
+    
 
 class SaveToFilePipeline(object):
     ''' pipeline that save data to disk '''
