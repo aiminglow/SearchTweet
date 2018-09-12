@@ -101,7 +101,7 @@ class SearchTweet(CrawlSpider):
 
             # get user id
             tweet['user_id'] = item.xpath('.//@data-user-id').extract()[0]
-            tweet['usernameTweet'] = item.xpath('.//@data-screen-name').extract_first()
+            # tweet['usernameTweet'] = item.xpath('.//@data-screen-name').extract_first()
 
             # number of reply retweet favorite
             nbr_reply = item.xpath(
@@ -135,7 +135,7 @@ class SearchTweet(CrawlSpider):
             # images
             images = item.xpath('.//div[@class="AdaptiveMedia-photoContainer js-adaptive-photo "]/@data-image-url').extract()
             if images:
-                tweet['has_image'] = True
+                # tweet['has_image'] = True
                 tweet['images'] = images
 
             # videos
@@ -148,7 +148,7 @@ class SearchTweet(CrawlSpider):
             sumfullcard = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-full-card-iframe-url').extract()
             sumurl = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-card-url').extract()
             if sumurl:
-                tweet['has_summary'] = True
+                # tweet['has_summary'] = True
                 tweet['sumfullcard'] = sumfullcard
                 tweet['sumurl'] = sumurl
 

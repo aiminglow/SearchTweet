@@ -14,7 +14,7 @@ class Tweet(Item):
     datetime = Field() # post time
     text = Field()     # text content
     user_id = Field()  # user id
-    usernameTweet = Field() # username of tweet
+    # usernameTweet = Field() # username of tweet
 
     nbr_retweet = Field()  # nbr of retweet
     nbr_favorite = Field() # nbr of favorite
@@ -23,13 +23,13 @@ class Tweet(Item):
     is_reply = Field()   # boolean if the tweet is a reply or not
     is_retweet = Field() # boolean if the tweet is just a retweet of another tweet
 
-    has_image = Field() # True/False, whether a tweet contains images
+    # has_image = Field() # True/False, whether a tweet contains images
     images = Field()    # a list of image urls, empty if none
 
     # has_video = Field() # True/False, whether a tweet contains videos
     # videos = Field()    # a list of video urls
 
-    has_summary = Field() # True/False,ahether atweet contains summarycard
+    # has_summary = Field() # True/False,ahether atweet contains summarycard
     sumfullcard = Field() # a list of summarycard's title,summary,domain,picture
     sumurl = Field()      # a list of summarycard's url
 

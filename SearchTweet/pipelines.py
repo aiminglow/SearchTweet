@@ -35,12 +35,19 @@ class SaveToMySqlPipeline(object):
         else:
             return True
         
-    def insert_one_tweet(self, item:Tweet):
+    def insert_one_tweet(self, item:Tweet, spider):
         
         if(None == item["tweet_id"]):
             return None
-        insert_tweet_sql = ""
+        insert_tweet_sql = "insert into searchtweet(keywords,tweet_id,url,`datetime`,`text`,user_id,nbr_retweet,nbr_favorite,nbr_reply,is_reply,is_retweet,images,sumfullcard,sumurl) "
+        insert_tweet_sql += "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         try:
+            self.cur.execute(insert_tweet_sql,data = (spider.query, item["ID"], item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"], item["nbr_favorite"], item["nbr_reply"], item["is_reply"], item["is_retweet"], item["images"], item["sumfullcard"], item["sumurl"]))
+        except mysql.connector.Error as err:
+            logger.info(err)
+        else:
+            logger.info("insert one tweet success")
+            self.conn.commit
 
     def find_one_user(self, user_id):
         query_user_sql = "select user_id from tweet_user where user_id='"+ user_id +"'"
@@ -55,7 +62,20 @@ class SaveToMySqlPipeline(object):
             return True
 
     def insert_one_user(self, User):
-
+        if(None == item["user_id"]):
+            return None
+        insert_user_sql = "insert into tweetuser(user_id,`name`,screen_name,avatar) "
+        insert_user_sql += "values(%s,%s,%s,%s)"
+        try:
+            self.cur.execute(insert_user_sql,data = (item["ID"], item["name"], item["screen_name"], item["avatar"]))
+        except mysql.connector.Error as err:
+            logger.info(err)
+        else:
+            logger.info("insert one user success")
+            self.conn.commit
+    
+    def process_item(self, item, spider):
+        return None
     
 
 class SaveToFilePipeline(object):
