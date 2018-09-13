@@ -108,10 +108,12 @@ venv.bak/
 .vscode/
 
 # test code. store in the other primary repository
-test/
+# test/
 
 # tweet data
 Data/
+!/Data/mysql/
+
 
 # log folder
 log/

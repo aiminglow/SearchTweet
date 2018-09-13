@@ -14,6 +14,7 @@ try:
     from urllib import quote  # Python 2.X
 except ImportError:
     from urllib.parse import quote  # Python 3+
+from SearchTweet.utils import get_keyword
 
 loggger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ class SearchTweet(CrawlSpider):
 
     def __init__(self, query='A股 since:2018-01-01 until:2018-06-01', lang='', crawl_user=True, top_tweet=False):
         
-        self.query = query
+        self.task_msg = get_keyword()
+        self.query = self.task_msg['keywords']
         self.url = "https://twitter.com/i/search/timeline?l={}".format(lang)
 
         if not top_tweet:
@@ -36,7 +38,6 @@ class SearchTweet(CrawlSpider):
 
     def start_requests(self):
         url = self.url % (quote(self.query), '')
-        #url = self.url % (self.query, '')
         yield  http.Request(url, 
                             meta={'proxy' : 'http://127.0.0.1:8118'},
                             headers=settings['DEFAULT_REQUEST_HEADERS'],
@@ -50,15 +51,21 @@ class SearchTweet(CrawlSpider):
             yield item
         
         # the next page
-        min_posstion = data['min_position']
-        url = self.url % (quote(self.query), min_posstion)
+        min_postion = data['min_position']
+        # 如果没有下一页，设置上一个任务状态为1：已完成，并且取一个新的关键词进行查询
+        if None == min_postion:
+            self.task_msg = get_keyword()  # 需要设置一个参数可以填或者不填的get_keyword方法，
+                                           # 爬虫init的时候不传参，调用parse_page的时候需要传上一个task_msg的id，让方法把这条的状态置为1：已完成
+            self.query = self.task_msg['keywords']
+
+        url = self.url % (quote(self.query), min_postion)            
         yield http.Request(url,
                             meta={'proxy' : 'http://127.0.0.1:8118'},
                             headers=settings['DEFAULT_REQUEST_HEADERS'],
                             #cookies=settings['DEFAULT_COOKIE'],
                             callback=self.parse_page)
-
-
+            
+        
     def prase_tweets_block(self, html_page):
         page = Selector(text=html_page)
         items = page.xpath('//li[@data-item-type="tweet"]/div')

@@ -23,7 +23,7 @@ class SaveToMySqlPipeline(object):
          host="localhost", database="spider_data", buffered=True)
         self.cur = self.conn.cursor()
 
-    def find_one_tweet(self, tweet_id):
+    def find_one_tweet(self, tweet_id:str):
         query_tweet_sql = "select tweet_id from search_tweet where tweet_id='"+ tweet_id +"'"
         try:
             id = self.cur.execute(query_tweet_sql)
@@ -49,7 +49,7 @@ class SaveToMySqlPipeline(object):
             logger.info("insert one tweet success")
             self.conn.commit
 
-    def find_one_user(self, user_id):
+    def find_one_user(self, user_id:str):
         query_user_sql = "select user_id from tweet_user where user_id='"+ user_id +"'"
         try:
             id = self.cur.execute(query_user_sql)
@@ -61,7 +61,7 @@ class SaveToMySqlPipeline(object):
         else:
             return True
 
-    def insert_one_user(self, User):
+    def insert_one_user(self, item:User):
         if(None == item["user_id"]):
             return None
         insert_user_sql = "insert into tweetuser(user_id,`name`,screen_name,avatar) "
@@ -75,7 +75,15 @@ class SaveToMySqlPipeline(object):
             self.conn.commit
     
     def process_item(self, item, spider):
-        return None
+        if isinstance(item, Tweet):
+            if not self.find_one_tweet(item['tweet_id']):
+                self.insert_one_tweet(item, spider)
+            
+        elif isinstance(item, User):
+            if not self.find_one_user(item['user_id']):
+                self.insert_one_user(item)
+        else:
+            logger.error("Item is neither tweet nor user !")
     
 
 class SaveToFilePipeline(object):
