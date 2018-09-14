@@ -7,7 +7,7 @@ user = 'dev'
 pwd = 'maisekou'
 conn = connect(user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
 cur = conn.cursor(dictionary=True)
-# query_keywords = 'select id,keywords,pre_table_name,begintime,endtime,`now`,`status` from taskqueue where id=(select min(id) from taskqueue where status!=1 and status!=2)'
+# query_keywords = 'select id,keywords,`table_name`,begintime,endtime,`now`,`status` from taskqueue where id=(select min(id) from taskqueue where status!=1 and status!=2)'
 query_keywords = 'select * from taskqueue'
 try:
     cur.execute(query_keywords)

@@ -20,9 +20,9 @@ class SaveToMySqlPipeline(object):
         user = settings["MYSQLUSER"]
         pwd = settings["MYSQLPWD"]
         self.conn = mysql.connector.connect(user=user, password=pwd, 
-         host="localhost", database="spider_data", buffered=True)
-        self.cur = self.conn.cursor()
-
+                    host="localhost", database="spider_data", buffered=True)
+        self.cur = self.conn.cursor(dictionary=True)
+        
     def find_one_tweet(self, tweet_id:str):
         query_tweet_sql = "select tweet_id from search_tweet where tweet_id='"+ tweet_id +"'"
         try:
@@ -75,6 +75,9 @@ class SaveToMySqlPipeline(object):
             self.conn.commit
     
     def process_item(self, item, spider):
+        # 如果表不存在，就调用create_table创建这个表
+        if not self.is_table_exist(spider.task_id['table_name']):
+            self.create_table(spider.task_id['table_name'])
         if isinstance(item, Tweet):
             if not self.find_one_tweet(item['tweet_id']):
                 self.insert_one_tweet(item, spider)
@@ -84,6 +87,27 @@ class SaveToMySqlPipeline(object):
                 self.insert_one_user(item)
         else:
             logger.error("Item is neither tweet nor user !")
+
+    def is_table_exist(self, table_name):
+        query_table_sql = 'SELECT table_name FROM information_schema.TABLES WHERE table_name=%s'
+        try:
+            self.cur.execute(query_table_sql, (table_name))
+            result = self.cur.fetchall()
+            if None is result or [] is result:
+                return False
+        except mysql.connector.Error as err:
+            logger.info('query table_name failed cause: %s', (err))
+            return False
+        return True
+        
+
+    def create_table(self, table_name):
+        create_table_sql = settings['TWEET_TABLE'] % (table_name)
+        try:
+            self.cur.execute(create_table_sql)
+        except mysql.connector.Error as err:
+            logger.info('create table %s failed cause: %s' % (table_name, err))
+        
     
 
 class SaveToFilePipeline(object):

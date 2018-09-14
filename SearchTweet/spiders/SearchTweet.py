@@ -54,7 +54,7 @@ class SearchTweet(CrawlSpider):
         min_postion = data['min_position']
         # 如果没有下一页，设置上一个任务状态为1：已完成，并且取一个新的关键词进行查询
         if None == min_postion:
-            self.task_msg = get_keyword()  # 需要设置一个参数可以填或者不填的get_keyword方法，
+            self.task_msg = get_keyword(self.task_msg['id'])  # 需要设置一个参数可以填或者不填的get_keyword方法，
                                            # 爬虫init的时候不传参，调用parse_page的时候需要传上一个task_msg的id，让方法把这条的状态置为1：已完成
             self.query = self.task_msg['keywords']
 
@@ -99,9 +99,9 @@ class SearchTweet(CrawlSpider):
                                             A股 大盘指数剔除\r\n
                                                         pic.twitter.com/qlynswoJLc \r\n
             '''
-            tweet['text'] = ' '.join(
-                item.xpath('.//div[@class="js-tweet-text-container"]/p//text()').extract()
-                ).replace(' # ', '#').replace(' @ ', '@')
+            dirty_text = ''.join(item.xpath('.//div[@class="js-tweet-text-container"]/p//text()').extract()
+             ).replace('\n','').replace(' # ', '#').replace(' @ ', '@')
+            tweet['text'] = re.sub(r'pic.*','', dirty_text)
 
             if ''==tweet['text']:
                 continue
