@@ -117,3 +117,6 @@ Data/
 
 # log folder
 log/
+
+# dev settings file
+settingsdev.py
