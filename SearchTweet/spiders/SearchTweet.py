@@ -23,10 +23,10 @@ class SearchTweet(CrawlSpider):
     name = 'search_tweet'
     allowed_domains = ['twitter.com']
 
-    def __init__(self, query='A股 since:2018-01-01 until:2018-06-01', lang='', crawl_user=True, top_tweet=False):
+    def __init__(self, query='', lang='', crawl_user=True, top_tweet=False):
         
         self.task_msg = get_keyword()
-        self.query = self.task_msg['keywords']
+        self.query = self.gen_query(self.task_msg)
         self.url = "https://twitter.com/i/search/timeline?l={}".format(lang)
 
         if not top_tweet:
@@ -35,6 +35,12 @@ class SearchTweet(CrawlSpider):
         self.url = self.url + '&q=%s&src=typed&max_position=%s'
 
         self.crawl_user = crawl_user
+
+    # 用从taskqueue表查询的结果中的keywords、begintime、endtime三个字段组成要进行查询的query
+    def gen_query(self, task:dict):
+        tmp = '%s since:%s until:%s'
+        return tmp % (task['keywords'], task['begintime'], task['endtime'])
+
 
     def start_requests(self):
         url = self.url % (quote(self.query), '')
@@ -56,7 +62,7 @@ class SearchTweet(CrawlSpider):
         if None == min_postion:
             self.task_msg = get_keyword(self.task_msg['id'])  # 需要设置一个参数可以填或者不填的get_keyword方法，
                                            # 爬虫init的时候不传参，调用parse_page的时候需要传上一个task_msg的id，让方法把这条的状态置为1：已完成
-            self.query = self.task_msg['keywords']
+            self.query = self.gen_query(self.task_msg)
 
         url = self.url % (quote(self.query), min_postion)            
         yield http.Request(url,

@@ -21,7 +21,14 @@ def get_keyword(*task_id):
     pwd = settings['MYSQLPWD']
     conn = connect(user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
     cur = conn.cursor(dictionary=True)
-    # 如果传入task_id参数，说明这个任务已经完成，将这条任务状态设置为1：已完成
+    # 如果传入task_id参数，这个任务就认定是已经爬取完成了，这期间爬取的时间段很长，不知道爬到什么时候，
+    # 不过幸亏是分页形式的查询，所以如果因为网络原因终端，前一页的内容已经存到了数据库了。
+    # 本来计划将一个keyword的查询的时间分割成几个部分，然后分给不同的爬虫，让他们一起爬取，
+    # 但是考虑到status状态字段设计起来太复杂了，所以不准备用这种方法了。
+    # 而且之后用上了redis这种MQ以后，用一个生成任务的脚本不断给redis提供将时间分开的task，然后爬虫直接从redis取任务，
+    # 这样各个模块之间多清楚啊，不用在这里捣鼓mysql的那一个字段了，也不用考虑数据库的锁和事务的问题了。
+
+    #这里只需要对查出来的keywords、begintime、endtime做处理将他们结合起来就OK了
     if(None != task_id):
         update_status(conn, cur, task_id[0], status=1)
     query_keywords = 'select id,keywords,`table_name`,begintime,endtime,`now`,`status` from taskqueue where id=(select min(id) from taskqueue where status!=1 and status!=2)'
