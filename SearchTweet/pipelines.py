@@ -23,8 +23,8 @@ class SaveToMySqlPipeline(object):
                     host="localhost", database="spider_data", buffered=True)
         self.cur = self.conn.cursor(dictionary=True)
         
-    def find_one_tweet(self, tweet_id:str):
-        query_tweet_sql = "select tweet_id from search_tweet where tweet_id='"+ tweet_id +"'"
+    def find_one_tweet(self, tweet_id:str, table_name:str):
+        query_tweet_sql = "select tweet_id from "+ table_name +" where tweet_id='"+ tweet_id +"'"
         try:
             id = self.cur.execute(query_tweet_sql)
         except mysql.connector.Error as err:
@@ -37,20 +37,21 @@ class SaveToMySqlPipeline(object):
         
     def insert_one_tweet(self, item:Tweet, spider):
         
-        if(None == item["tweet_id"]):
+        if(None == item["ID"]):
             return None
-        insert_tweet_sql = "insert into searchtweet(keywords,tweet_id,url,`datetime`,`text`,user_id,nbr_retweet,nbr_favorite,nbr_reply,is_reply,is_retweet,images,sumfullcard,sumurl) "
-        insert_tweet_sql += "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        insert_tweet_sql = "insert ignore into "+ spider.task_msg['table_name'] +"(keywords,tweet_id,url,`datetime`,`text`,user_id,nbr_retweet,nbr_favorite,nbr_reply,is_reply,is_retweet,images,sumfullcard,sumurl) "
+        insert_tweet_sql += "values('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},{8},{9},{10},'{11}','{12}','{13}')"
         try:
-            self.cur.execute(insert_tweet_sql,data = (spider.query, item["ID"], item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"], item["nbr_favorite"], item["nbr_reply"], item["is_reply"], item["is_retweet"], item["images"], item["sumfullcard"], item["sumurl"]))
+            self.cur.execute(insert_tweet_sql.format(spider.query, item["ID"], item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"], item["nbr_favorite"], item["nbr_reply"], item["is_reply"], item["is_retweet"], item["images"], item["sumfullcard"], item["sumurl"]))
+            self.conn.commit()
         except mysql.connector.Error as err:
             logger.info(err)
         else:
             logger.info("insert one tweet success")
-            self.conn.commit
+            
 
     def find_one_user(self, user_id:str):
-        query_user_sql = "select user_id from tweet_user where user_id='"+ user_id +"'"
+        query_user_sql = "select user_id from tweetuser where user_id='"+ user_id +"'"
         try:
             id = self.cur.execute(query_user_sql)
         except mysql.connector.Error as err:
@@ -62,12 +63,12 @@ class SaveToMySqlPipeline(object):
             return True
 
     def insert_one_user(self, item:User):
-        if(None == item["user_id"]):
+        if(None == item["ID"]):
             return None
-        insert_user_sql = "insert into tweetuser(user_id,`name`,screen_name,avatar) "
-        insert_user_sql += "values(%s,%s,%s,%s)"
+        insert_user_sql = "insert ignore into tweetuser(user_id,`name`,screen_name,avatar) "
+        insert_user_sql += "values('%s','%s','%s','%s')"
         try:
-            self.cur.execute(insert_user_sql,data = (item["ID"], item["name"], item["screen_name"], item["avatar"]))
+            self.cur.execute(insert_user_sql % (item["ID"], item["name"], item["screen_name"], item["avatar"]))
         except mysql.connector.Error as err:
             logger.info(err)
         else:
@@ -76,29 +77,32 @@ class SaveToMySqlPipeline(object):
     
     def process_item(self, item, spider):
         # 如果表不存在，就调用create_table创建这个表
-        if not self.is_table_exist(spider.task_id['table_name']):
-            self.create_table(spider.task_id['table_name'])
+        table_name = spider.task_msg['table_name']
+        if not self.is_table_exist(table_name):
+            self.create_table(table_name)
         if isinstance(item, Tweet):
-            if not self.find_one_tweet(item['tweet_id']):
+            if not self.find_one_tweet(item['ID'], table_name):
                 self.insert_one_tweet(item, spider)
             
         elif isinstance(item, User):
-            if not self.find_one_user(item['user_id']):
+            if not self.find_one_user(item['ID']):
                 self.insert_one_user(item)
         else:
             logger.error("Item is neither tweet nor user !")
 
     def is_table_exist(self, table_name):
-        query_table_sql = 'SELECT table_name FROM information_schema.TABLES WHERE table_name=%s'
+        query_table_sql = "SELECT table_name FROM information_schema.TABLES WHERE table_name='"+ table_name +"'"
         try:
-            self.cur.execute(query_table_sql, (table_name))
+            self.cur.execute(query_table_sql)
             result = self.cur.fetchall()
-            if None is result or [] is result:
+            if(([] == result) or (None == result)):
                 return False
+            else:
+                return True
         except mysql.connector.Error as err:
             logger.info('query table_name failed cause: %s', (err))
             return False
-        return True
+        
         
 
     def create_table(self, table_name):
@@ -108,7 +112,13 @@ class SaveToMySqlPipeline(object):
         except mysql.connector.Error as err:
             logger.info('create table %s failed cause: %s' % (table_name, err))
         
-    
+class DefaultValuesPipeline(object):
+    def process_item(self, item, spider):
+        if isinstance(item, Tweet):
+            item.setdefault('images', '-1')
+            item.setdefault('sumfullcard', '-1')
+            item.setdefault('sumurl', '-1')
+        return item
 
 class SaveToFilePipeline(object):
     ''' pipeline that save data to disk '''

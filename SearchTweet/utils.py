@@ -16,7 +16,7 @@ def mkdirs(dirs):
 并且将状态设置为2：被锁，防止其他爬虫同时使用这一条。返回一个dict
 !!! 方法需要改成，可选填参数，从而适应第一次get_keyword和上一个爬虫爬完了，需要更改task表状态然后在get_keyword
 '''
-def get_keyword(*task_id):
+def get_keyword(task_id=-1):
     user = settings['MYSQLUSER']
     pwd = settings['MYSQLPWD']
     conn = connect(user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
@@ -29,8 +29,8 @@ def get_keyword(*task_id):
     # 这样各个模块之间多清楚啊，不用在这里捣鼓mysql的那一个字段了，也不用考虑数据库的锁和事务的问题了。
 
     #这里只需要对查出来的keywords、begintime、endtime做处理将他们结合起来就OK了
-    if(None != task_id):
-        update_status(conn, cur, task_id[0], status=1)
+    if(-1 != task_id):
+        update_status(conn, cur, task_id, status=1)
     query_keywords = 'select id,keywords,`table_name`,begintime,endtime,`now`,`status` from taskqueue where id=(select min(id) from taskqueue where status!=1 and status!=2)'
     try:
         cur.execute(query_keywords)

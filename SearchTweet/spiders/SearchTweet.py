@@ -39,7 +39,7 @@ class SearchTweet(CrawlSpider):
     # 用从taskqueue表查询的结果中的keywords、begintime、endtime三个字段组成要进行查询的query
     def gen_query(self, task:dict):
         tmp = '%s since:%s until:%s'
-        return tmp % (task['keywords'], task['begintime'], task['endtime'])
+        return tmp % (task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
 
 
     def start_requests(self):
@@ -88,7 +88,7 @@ class SearchTweet(CrawlSpider):
             tweet['ID'] = ID[0]
 
             # tweet-url
-            tweet['url'] = item.xpath('.//@data-permalink-path').extract()
+            tweet['url'] = item.xpath('.//@data-permalink-path').extract_first()
 
             #tweet datetime ?which timezone it is?
             tweet['datetime'] = datetime.fromtimestamp(
@@ -173,7 +173,7 @@ class SearchTweet(CrawlSpider):
                 user = User()
                 user['ID'] = tweet['user_id']
                 user['name'] = item.xpath('.//@data-name').extract_first()
-                user['screen_name'] = tweet['usernameTweet']
+                user['screen_name'] = item.xpath('.//@data-screen-name').extract_first()
                 user['avatar'] = item.xpath('.//img[@class="avatar js-action-profile-avatar"]/@src').extract_first()
 
                 yield user
