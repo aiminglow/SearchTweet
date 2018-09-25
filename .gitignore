@@ -111,7 +111,7 @@ venv.bak/
 # test/
 
 # tweet data
-Data/
+/Data/*
 !/Data/mysql/
 
 
