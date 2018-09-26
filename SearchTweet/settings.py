@@ -40,12 +40,13 @@ TWEET_TABLE='''create table %s (
 LOG_ENABLED = True
 LOG_FILE = './log/debug.log'
 LOG_ENCODING = 'UTF-8'
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 
 ITEM_PIPELINES = {
-    'SearchTweet.pipelines.SaveToFilePipeline':100,
+    #'SearchTweet.pipelines.SaveToFilePipeline':100,
     #'SearchTweet.pipelines.SaveToMongoPipeline':100, # replace `SaveToFilePipeline` with this to use MongoDB
-    #'SearchTweet.pipelines.SavetoMySQLPipeline':100, # replace `SaveToFilePipeline` with this to use MySQL
+    'SearchTweet.pipelines.SaveToMySqlPipeline':100, # replace `SaveToFilePipeline` with this to use MySQL
+    'SearchTweet.pipelines.DefaultValuesPipeline':50,
 }
 
 DEFAULT_REQUEST_HEADERS = {
@@ -60,7 +61,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Upgrade-Insecure-Requests':'1',
     'Content-Type':'application/x-www-form-urlencoded'}
 
-DEFAULT_COOKIE = ['_twitter_sess=BAh7CSIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%250ASGFzaHsABjoKQHVzZWR7ADoPY3JlYXRlZF9hdGwrCAstgJ5lAToMY3NyZl9p%250AZCIlNTJkOWY0N2E0NDg1ZGVmMDM0ZGE4MmRkYzYxZDJmZGU6B2lkIiUyZDc2%250AMTYwOGRlYzM5NDRiYWY3NTQ4ZmQ0YzU3NjAwMw%253D%253D--6306899c4c1dee1bfe6f19c8b4e47193f286e0df; Path=/; Domain=.twitter.com; Secure; HTTPOnly']
+DEFAULT_COOKIE = ['_twitter_sess=you cookie']
 
 
 # settings for where to save data on disk
