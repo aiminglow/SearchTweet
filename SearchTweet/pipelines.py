@@ -36,18 +36,20 @@ class SaveToMySqlPipeline(object):
             return True
         
     def insert_one_tweet(self, item:Tweet, spider):
-        
-        if(None == item["ID"]):
+        query = spider.query
+        tweet_id = item['ID']
+        if(None == tweet_id):
             return None
         insert_tweet_sql = "insert ignore into "+ spider.task_msg['table_name'] +"(keywords,tweet_id,url,`datetime`,`text`,user_id,nbr_retweet,nbr_favorite,nbr_reply,is_reply,is_retweet,images,sumfullcard,sumurl) "
         insert_tweet_sql += "values('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},{8},{9},{10},'{11}','{12}','{13}')"
+        insert_tweet_sql = insert_tweet_sql.format(query, tweet_id, item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"], item["nbr_favorite"], item["nbr_reply"], item["is_reply"], item["is_retweet"], item["images"], item["sumfullcard"], item["sumurl"])
         try:
-            self.cur.execute(insert_tweet_sql.format(spider.query, item["ID"], item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"], item["nbr_favorite"], item["nbr_reply"], item["is_reply"], item["is_retweet"], item["images"], item["sumfullcard"], item["sumurl"]))
+            self.cur.execute(insert_tweet_sql)
             self.conn.commit()
         except mysql.connector.Error as err:
-            logger.info(err)
+            logger.info("FAILED：" + str(err) + " SQL: " + insert_tweet_sql)
         else:
-            logger.info("insert one tweet success")
+            logger.info("SUCCESS:insert one TWEET "+ tweet_id +" success with "+ query)
             
 
     def find_one_user(self, user_id:str):
@@ -63,17 +65,20 @@ class SaveToMySqlPipeline(object):
             return True
 
     def insert_one_user(self, item:User):
+        user_id = item['ID']
         if(None == item["ID"]):
             return None
         insert_user_sql = "insert ignore into tweetuser(user_id,`name`,screen_name,avatar) "
         insert_user_sql += "values('%s','%s','%s','%s')"
+        insert_user_sql = insert_user_sql % (item["ID"], item["name"], item["screen_name"], item["avatar"])
         try:
-            self.cur.execute(insert_user_sql % (item["ID"], item["name"], item["screen_name"], item["avatar"]))
-        except mysql.connector.Error as err:
-            logger.info(err)
-        else:
-            logger.info("insert one user success")
+            self.cur.execute(insert_user_sql)
             self.conn.commit
+        except mysql.connector.Error as err:
+            logger.info("FAILED：" + str(err) + " SQL: " + insert_user_sql)
+        else:
+            logger.info("SUCCESS:insert one USER "+ user_id +" success")
+            
     
     def process_item(self, item, spider):
         # 如果表不存在，就调用create_table创建这个表
@@ -81,12 +86,13 @@ class SaveToMySqlPipeline(object):
         if not self.is_table_exist(table_name):
             self.create_table(table_name)
         if isinstance(item, Tweet):
-            if not self.find_one_tweet(item['ID'], table_name):
-                self.insert_one_tweet(item, spider)
-            
+            # if not self.find_one_tweet(item['ID'], table_name):
+            #     self.insert_one_tweet(item, spider)
+            self.insert_one_tweet(item, spider)
         elif isinstance(item, User):
-            if not self.find_one_user(item['ID']):
-                self.insert_one_user(item)
+            # if not self.find_one_user(item['ID']):
+            #     self.insert_one_user(item)
+            self.insert_one_user(item)
         else:
             logger.error("Item is neither tweet nor user !")
 
@@ -100,7 +106,7 @@ class SaveToMySqlPipeline(object):
             else:
                 return True
         except mysql.connector.Error as err:
-            logger.info('query table_name failed cause: %s', (err))
+            logger.info('query table_name failed cause: %s', str(err))
             return False
         
         

@@ -14,7 +14,7 @@ try:
     from urllib import quote  # Python 2.X
 except ImportError:
     from urllib.parse import quote  # Python 3+
-from SearchTweet.utils import get_keyword
+from SearchTweet.utils import get_keyword, escape_text
 
 loggger = logging.getLogger(__name__)
 
@@ -105,8 +105,8 @@ class SearchTweet(CrawlSpider):
                                             A股 大盘指数剔除\r\n
                                                         pic.twitter.com/qlynswoJLc \r\n
             '''
-            dirty_text = ''.join(item.xpath('.//div[@class="js-tweet-text-container"]/p//text()').extract()
-             ).replace('\n','').replace(' # ', '#').replace(' @ ', '@')
+            dirty_text = escape_text(''.join(item.xpath('.//div[@class="js-tweet-text-container"]/p//text()').extract()
+             ).replace('\n','').replace(' # ', '#'))
             tweet['text'] = re.sub(r'pic.*','', dirty_text)
 
             if ''==tweet['text']:
@@ -146,7 +146,7 @@ class SearchTweet(CrawlSpider):
             tweet['is_retweet'] = is_retweet != []
 
             # images
-            images = item.xpath('.//div[@class="AdaptiveMedia-photoContainer js-adaptive-photo "]/@data-image-url').extract()
+            images = item.xpath('.//div[@class="AdaptiveMedia-photoContainer js-adaptive-photo "]/@data-image-url').extract_first()
             if images:
                 # tweet['has_image'] = True
                 tweet['images'] = images
@@ -158,8 +158,8 @@ class SearchTweet(CrawlSpider):
             #     tweet['videos'] = videos
 
             # summary card
-            sumfullcard = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-full-card-iframe-url').extract()
-            sumurl = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-card-url').extract()
+            sumfullcard = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-full-card-iframe-url').extract_first()
+            sumurl = item.xpath('.//div[@data-card-name="summary_large_image"]/@data-card-url').extract_first()
             if sumurl:
                 # tweet['has_summary'] = True
                 tweet['sumfullcard'] = sumfullcard
@@ -172,7 +172,7 @@ class SearchTweet(CrawlSpider):
             if self.crawl_user:
                 user = User()
                 user['ID'] = tweet['user_id']
-                user['name'] = item.xpath('.//@data-name').extract_first()
+                user['name'] = escape_text(item.xpath('.//@data-name').extract_first())
                 user['screen_name'] = item.xpath('.//@data-screen-name').extract_first()
                 user['avatar'] = item.xpath('.//img[@class="avatar js-action-profile-avatar"]/@src').extract_first()
 

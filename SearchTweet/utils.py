@@ -57,6 +57,12 @@ def update_status(conn, cur, task_id, status=1):
     update_sql = 'update taskqueue set status=%s where id=%s'
     try:
         cur.execute(update_sql, (status, task_id))
+        conn.commit()
     except mysql.connector.Error as err:
-        print('update task status id=%s status=%s failed: %s', (status, task_id),str(err))
+        print('update task status id=%s status=%s failed: %s', (status, task_id,str(err)))
+
+# 给spider类提供的方法：换掉字符串里面的单引号、双引号和反斜杠
+def escape_text(s:str):
+    s = s.replace('\\', '\\\\').replace("'", "\\\'").replace('"', '\\\"')
+    return s
     
