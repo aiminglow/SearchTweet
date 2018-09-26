@@ -16,7 +16,7 @@ except ImportError:
     from urllib.parse import quote  # Python 3+
 from SearchTweet.utils import get_keyword, escape_text
 
-loggger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class SearchTweet(CrawlSpider):
 
@@ -25,8 +25,10 @@ class SearchTweet(CrawlSpider):
 
     def __init__(self, query='', lang='', crawl_user=True, top_tweet=False):
         
-        self.task_msg = get_keyword()
-        self.query = self.gen_query(self.task_msg)
+        # 要想在这里关闭spider，要给方法传入spider对象，但是这时候spider的init方法还没执行完呢，对象还没创建呢！
+        # 所以说，这个task_msg的位置不好。
+        # self.task_msg = get_keyword()
+        # self.query = self.gen_query(self.task_msg)
         self.url = "https://twitter.com/i/search/timeline?l={}".format(lang)
 
         if not top_tweet:
@@ -43,7 +45,11 @@ class SearchTweet(CrawlSpider):
 
 
     def start_requests(self):
+        # 调用utils的方法get_keyword，获得task任务，其中包括查询关键词keywords和查询时间范围
+        self.task_msg = get_keyword()
+        self.query = self.gen_query(self.task_msg)
         url = self.url % (quote(self.query), '')
+        logger.info('Prepare to crawl THE FIRST PAGE with url: ' + url)
         yield  http.Request(url, 
                             meta={'proxy' : 'http://127.0.0.1:8118'},
                             headers=settings['DEFAULT_REQUEST_HEADERS'],
@@ -63,8 +69,10 @@ class SearchTweet(CrawlSpider):
             self.task_msg = get_keyword(self.task_msg['id'])  # 需要设置一个参数可以填或者不填的get_keyword方法，
                                            # 爬虫init的时候不传参，调用parse_page的时候需要传上一个task_msg的id，让方法把这条的状态置为1：已完成
             self.query = self.gen_query(self.task_msg)
+            logger.info('Prepare to crawl a new page with A NEW QUERY: ' + self.query)
 
         url = self.url % (quote(self.query), min_postion)            
+        logger.debug('Prepare to crawl A NEW PAGE with URL: ' + url)
         yield http.Request(url,
                             meta={'proxy' : 'http://127.0.0.1:8118'},
                             headers=settings['DEFAULT_REQUEST_HEADERS'],

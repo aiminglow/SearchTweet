@@ -3,7 +3,7 @@
 import os
 import mysql.connector
 from mysql.connector import connect
-from logging import Logger
+import logging
 from scrapy.conf import settings
 from mysql.connector import errorcode
 
@@ -11,6 +11,9 @@ def mkdirs(dirs):
     ''' Create `dirs` if not exist. '''
     if not os.path.exists(dirs):
         os.makedirs(dirs)
+
+logger = logging.getLogger(__name__)
+
 '''
 从taskqueue表查找一条状态status不为1：已经查找完成 或 2：正在查找，被锁住 的记录；
 并且将状态设置为2：被锁，防止其他爬虫同时使用这一条。返回一个dict
@@ -38,9 +41,12 @@ def get_keyword(task_id=-1):
         if(None != result):
             # 如果能够查到结果，将结果集list的第一条的状态设置为2
             update_status(conn, cur, result[0]['id'], status=2)
-        return result[0]       #返回值是result[0]，类型为dict，而不是result，类型为list
+            return result[0]       #返回值是result[0]，类型为dict，而不是result，类型为list
+        else:
+            logger.info('STOP: No Task, Stop Crawl.')
+            return None
     except mysql.connector.Error as err:
-        print('select keyword from task error: ' + str(err))
+        logger.info('Select keyword from task error: ' + str(err))
         return None
     finally:
         cur.close()
@@ -59,7 +65,9 @@ def update_status(conn, cur, task_id, status=1):
         cur.execute(update_sql, (status, task_id))
         conn.commit()
     except mysql.connector.Error as err:
-        print('update task status id=%s status=%s failed: %s', (status, task_id,str(err)))
+        logger.info('Update task status id=%s status=%s failed cause: %s' % (status, task_id, str(err)))
+    else:
+        logger.debug('Update task status id=%s status=%s ' % (status, task_id))
 
 # 给spider类提供的方法：换掉字符串里面的单引号、双引号和反斜杠
 def escape_text(s:str):

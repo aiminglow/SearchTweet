@@ -28,6 +28,7 @@ class SaveToMySqlPipeline(object):
         try:
             id = self.cur.execute(query_tweet_sql)
         except mysql.connector.Error as err:
+            logger.info('find one tweet failed cause: ' + str(err))
             return False
         
         if(None == id):
@@ -49,7 +50,7 @@ class SaveToMySqlPipeline(object):
         except mysql.connector.Error as err:
             logger.info("FAILED：" + str(err) + " SQL: " + insert_tweet_sql)
         else:
-            logger.info("SUCCESS:insert one TWEET "+ tweet_id +" success with "+ query)
+            logger.debug("SUCCESS:insert one TWEET "+ tweet_id +" success with "+ query)
             
 
     def find_one_user(self, user_id:str):
@@ -57,6 +58,7 @@ class SaveToMySqlPipeline(object):
         try:
             id = self.cur.execute(query_user_sql)
         except mysql.connector.Error as err:
+            logger.info('find one user failed cause: ' + str(err))
             return False
         
         if(None == id):
@@ -77,7 +79,7 @@ class SaveToMySqlPipeline(object):
         except mysql.connector.Error as err:
             logger.info("FAILED：" + str(err) + " SQL: " + insert_user_sql)
         else:
-            logger.info("SUCCESS:insert one USER "+ user_id +" success")
+            logger.debug("SUCCESS:insert one USER "+ user_id +" success")
             
     
     def process_item(self, item, spider):
@@ -106,7 +108,7 @@ class SaveToMySqlPipeline(object):
             else:
                 return True
         except mysql.connector.Error as err:
-            logger.info('query table_name failed cause: %s', str(err))
+            logger.info('Query table_name failed cause: %s', str(err))
             return False
         
         
@@ -116,7 +118,7 @@ class SaveToMySqlPipeline(object):
         try:
             self.cur.execute(create_table_sql)
         except mysql.connector.Error as err:
-            logger.info('create table %s failed cause: %s' % (table_name, err))
+            logger.info('Create table %s failed cause: %s' % (table_name, str(err)))
         
 class DefaultValuesPipeline(object):
     def process_item(self, item, spider):
