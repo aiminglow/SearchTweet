@@ -41,7 +41,13 @@ class SearchTweet(CrawlSpider):
     # 用从taskqueue表查询的结果中的keywords、begintime、endtime三个字段组成要进行查询的query
     def gen_query(self, task:dict):
         tmp = '%s since:%s until:%s'
-        return tmp % (task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
+        task_now = task['now'].strftime('%Y-%m-%d')
+        # 如果task表的now字段不是默认值，而是修改过的，说明之前运行在这一条中断了，继续搜索这一条
+        if('1980-01-01' != task_now):
+            # 搜索的keywords前面加上 $ 符号，能够更精准的搜索股票相关的tweet
+            return tmp % ('$' + task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task_now)
+        else:    
+            return tmp % (task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
 
 
     def start_requests(self):
@@ -99,9 +105,11 @@ class SearchTweet(CrawlSpider):
             tweet['url'] = item.xpath('.//@data-permalink-path').extract_first()
 
             #tweet datetime ?which timezone it is?
-            tweet['datetime'] = datetime.fromtimestamp(
-                int(item.xpath('.//small[@class="time"]/a/span/@data-time').extract_first())
-                ).strftime('%Y-%m-%d %H:%M:%S')
+            tweet_datetime = item.xpath('.//small[@class="time"]/a/span/@data-time').extract_first()
+            if None is not datetime:
+                tweet['datetime'] = datetime.fromtimestamp(int(tweet_datetime)).strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                tweet['datetime'] = datetime(1980,1,1,0,0,0).strftime('%Y-%m-%d %H:%M:%S')
             
             # tweet text. why the # and @ has space ?     
             # can i drop the url-text:pic.twitter.com/qlynswoJLc with regular expression ?
