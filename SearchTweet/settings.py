@@ -48,6 +48,8 @@ ITEM_PIPELINES = {
     'SearchTweet.pipelines.SaveToMySqlPipeline':100, # replace `SaveToFilePipeline` with this to use MySQL
     'SearchTweet.pipelines.DefaultValuesPipeline':50,
 }
+# 利用中间件，重写父类方法，关闭过滤重复的方法
+DUPEFILTER_CLASS = 'SearchTweet.duplicate_filter.CustomFilter'
 
 DEFAULT_REQUEST_HEADERS = {
     'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
