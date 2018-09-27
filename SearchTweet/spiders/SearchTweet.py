@@ -47,7 +47,7 @@ class SearchTweet(CrawlSpider):
             # 搜索的keywords前面加上 $ 符号，能够更精准的搜索股票相关的tweet
             return tmp % ('$' + task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task_now)
         else:    
-            return tmp % (task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
+            return tmp % ('$' + task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
 
 
     def start_requests(self):
