@@ -19,7 +19,7 @@ class SaveToMySqlPipeline(object):
     def __init__(self):
         user = settings["MYSQLUSER"]
         pwd = settings["MYSQLPWD"]
-        self.conn = mysql.connector.connect(user=user, password=pwd, 
+        self.conn = mysql.connector.connect(auth_plugin='mysql_native_password', user=user, password=pwd, 
                     host="localhost", database="spider_data", buffered=True)
         self.cur = self.conn.cursor(dictionary=True)
         

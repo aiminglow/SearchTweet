@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 def get_keyword(task_id=-1):
     user = settings['MYSQLUSER']
     pwd = settings['MYSQLPWD']
-    conn = connect(user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
+    conn = connect(auth_plugin='mysql_native_password', user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
     cur = conn.cursor(dictionary=True)
     # 如果传入task_id参数，这个任务就认定是已经爬取完成了，这期间爬取的时间段很长，不知道爬到什么时候，
     # 不过幸亏是分页形式的查询，所以如果因为网络原因终端，前一页的内容已经存到了数据库了。
