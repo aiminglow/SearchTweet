@@ -8,6 +8,7 @@ import logging
 import json
 import mysql.connector
 from mysql.connector import errorcode
+from SearchTweet.utils import conn, cur, close
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting

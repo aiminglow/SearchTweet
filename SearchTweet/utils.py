@@ -7,6 +7,16 @@ import logging
 from scrapy.conf import settings
 from mysql.connector import errorcode
 
+user = settings['MYSQLUSER']
+pwd = settings['MYSQLPWD']
+conn = connect(auth_plugin='mysql_native_password', user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
+cur = conn.cursor(dictionary=True)
+
+def close(conn, cur):
+    cur.close()
+    conn.close()
+
+
 def mkdirs(dirs):
     ''' Create `dirs` if not exist. '''
     if not os.path.exists(dirs):

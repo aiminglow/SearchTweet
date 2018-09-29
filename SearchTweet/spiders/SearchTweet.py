@@ -69,15 +69,8 @@ class SearchTweet(CrawlSpider):
             yield item
         
         # the next page
-        min_postion = data['min_position']
-        # 如果没有下一页，设置上一个任务状态为1：已完成，并且取一个新的关键词进行查询
-        if None == min_postion:
-            self.task_msg = get_keyword(self.task_msg['id'])  # 需要设置一个参数可以填或者不填的get_keyword方法，
-                                           # 爬虫init的时候不传参，调用parse_page的时候需要传上一个task_msg的id，让方法把这条的状态置为1：已完成
-            self.query = self.gen_query(self.task_msg)
-            logger.info('Prepare to crawl a new page with A NEW QUERY: ' + self.query)
-
-        url = self.url % (quote(self.query), min_postion)            
+        min_position = data['min_position']
+        url = self.url % (quote(self.query), min_position)            
         logger.debug('Prepare to crawl A NEW PAGE with URL: ' + url)
         yield http.Request(url,
                             meta={'proxy' : 'http://127.0.0.1:8118'},

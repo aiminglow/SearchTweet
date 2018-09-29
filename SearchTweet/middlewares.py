@@ -9,9 +9,8 @@ from scrapy import signals
 from scrapy.dupefilter import RFPDupeFilter
 
 
-
 # 利用中间件，重写父类方法，关闭过滤重复的方法
-class CloseDupefilter(RFPDupeFilter):
+class UpdateTaskStatusDupefilter(RFPDupeFilter):
     def request_seen(self, request):
         return False
 
