@@ -49,7 +49,7 @@ ITEM_PIPELINES = {
     'SearchTweet.pipelines.DefaultValuesPipeline':50,
 }
 
-DUPEFILTER_CLASS ='SearchTweet.middlewares.UpdateTaskStatusDupefilter'
+# DUPEFILTER_CLASS ='SearchTweet.middlewares.UpdateTaskStatusDupefilter'
 
 DEFAULT_REQUEST_HEADERS = {
     'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",

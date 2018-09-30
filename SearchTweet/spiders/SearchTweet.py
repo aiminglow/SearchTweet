@@ -24,11 +24,9 @@ class SearchTweet(CrawlSpider):
     allowed_domains = ['twitter.com']
 
     def __init__(self, query='', lang='', crawl_user=True, top_tweet=False):
-        
-        # 要想在这里关闭spider，要给方法传入spider对象，但是这时候spider的init方法还没执行完呢，对象还没创建呢！
-        # 所以说，这个task_msg的位置不好。
-        # self.task_msg = get_keyword()
-        # self.query = self.gen_query(self.task_msg)
+        self.task_msg = get_keyword()
+        self.query = self.gen_query(self.task_msg)
+
         self.url = "https://twitter.com/i/search/timeline?l={}".format(lang)
 
         if not top_tweet:
@@ -51,9 +49,6 @@ class SearchTweet(CrawlSpider):
 
 
     def start_requests(self):
-        # 调用utils的方法get_keyword，获得task任务，其中包括查询关键词keywords和查询时间范围
-        self.task_msg = get_keyword()
-        self.query = self.gen_query(self.task_msg)
         url = self.url % (quote(self.query), '')
         logger.info('Prepare to crawl THE FIRST PAGE with url: ' + url)
         yield  http.Request(url, 

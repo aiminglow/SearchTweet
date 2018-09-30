@@ -8,7 +8,7 @@ import logging
 import json
 import mysql.connector
 from mysql.connector import errorcode
-from SearchTweet.utils import conn, cur, close
+from SearchTweet.utils import MYSQLDB, update_status
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -18,11 +18,8 @@ logger = logging.getLogger(__name__)
 class SaveToMySqlPipeline(object):
 
     def __init__(self):
-        user = settings["MYSQLUSER"]
-        pwd = settings["MYSQLPWD"]
-        self.conn = mysql.connector.connect(auth_plugin='mysql_native_password', user=user, password=pwd, 
-                    host="localhost", database="spider_data", buffered=True)
-        self.cur = self.conn.cursor(dictionary=True)
+        self.conn = MYSQLDB.conn
+        self.cur = MYSQLDB.cur
         
     def find_one_tweet(self, tweet_id:str, table_name:str):
         query_tweet_sql = "select tweet_id from "+ table_name +" where tweet_id='"+ tweet_id +"'"
@@ -89,6 +86,7 @@ class SaveToMySqlPipeline(object):
         if not self.is_table_exist(table_name):
             self.create_table(table_name)
         if isinstance(item, Tweet):
+            # 执行sql查重，如果重复则不插入。这里insert使用了ignore，所以可以不使用查重方法，下面插入User同理
             # if not self.find_one_tweet(item['ID'], table_name):
             #     self.insert_one_tweet(item, spider)
             self.insert_one_tweet(item, spider)
@@ -120,6 +118,10 @@ class SaveToMySqlPipeline(object):
             self.cur.execute(create_table_sql)
         except mysql.connector.Error as err:
             logger.info('Create table %s failed cause: %s' % (table_name, str(err)))
+
+    def close_spider(self, spider):
+        update_status(task_id=int(spider.task_msg['id']), status=1)
+        MYSQLDB.close()
         
 class DefaultValuesPipeline(object):
     def process_item(self, item, spider):
