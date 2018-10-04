@@ -1,5 +1,4 @@
 #!/bin/bash
 
 
-cd ../
-nohup scrapy crawl $1 >./log/nohup.out 2>&1 &
+nohup ./task_crawl.sh $1 >../log/nohup.out 2>&1 &
