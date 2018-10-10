@@ -1,29 +1,23 @@
 #!/bin/bash
 
 SPIDER_NAME=$1
-echo ${SPIDER_NAME}
 SHELLPATH=$(pwd)
 STOPFILE=$SHELLPATH/stop_crawl.flag
 SCRAPYPATH=$SHELLPATH/..
-LOGPATH=$SHELLPATH/../log
+NOHUPOUT=$SHELLPATH/../log/nohup.out
 
 function check(){
     count=$(ps -aux | grep ${SPIDER_NAME} | grep -v "grep" | grep -v "task_crawl" | wc -l )
-    if [ ${count} -gt 0 ]
+    if [ ${count} -eq 0 ]
     then
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][SHELL]Spider is still alive."
-    else
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][SHELL]Spider is not alive."
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][SHELL]Start crawl task [${num}]."
         cd ${SCRAPYPATH}
-        scrapy crawl ${SPIDER_NAME}
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][SHELL]Spider crawl task [${num}] complete."
+        nohup scrapy crawl ${SPIDER_NAME} >${NOHUPOUT} 2>&1 &
     fi
 }
 
 
 echo 0 > ${STOPFILE}
-for ((num=1;num>-1;num++))
+while true
 do
     cd ${SHELLPATH}
     line=$(head -1 stop_crawl.flag)
@@ -32,6 +26,6 @@ do
     then
         exit 0
     fi
-    sleep 2
     check
+    sleep 10
 done

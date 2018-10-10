@@ -117,6 +117,7 @@ venv.bak/
 
 # log folder
 log/
+shell/nohup.out
 
 # dev settings file
 settingsdev.py

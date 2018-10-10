@@ -44,7 +44,7 @@ class SaveToMySqlPipeline(object):
         insert_tweet_sql = insert_tweet_sql.format(query, tweet_id, item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"], item["nbr_favorite"], item["nbr_reply"], item["is_reply"], item["is_retweet"], item["images"], item["sumfullcard"], item["sumurl"])
         try:
             self.cur.execute(insert_tweet_sql)
-            self.conn.commit()
+            # self.conn.commit()
         except mysql.connector.Error as err:
             logger.info("FAILED：" + str(err) + " SQL: " + insert_tweet_sql)
         else:
@@ -73,7 +73,7 @@ class SaveToMySqlPipeline(object):
         insert_user_sql = insert_user_sql % (item["ID"], item["name"], item["screen_name"], item["avatar"])
         try:
             self.cur.execute(insert_user_sql)
-            self.conn.commit
+            # self.conn.commit
         except mysql.connector.Error as err:
             logger.info("FAILED：" + str(err) + " SQL: " + insert_user_sql)
         else:

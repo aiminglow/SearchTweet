@@ -14,9 +14,16 @@ class MYSQLDB(object):
     pwd = settings['MYSQLPWD']
     conn = connect(auth_plugin='mysql_native_password', user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
     cur = conn.cursor(dictionary=True)
+    
+
+    cur.execute('SET autocommit=0')
+    cur.execute('SET unique_checks=0')
+    cur.execute('SET foreign_key_checks=0')
 
     @staticmethod
     def close():
+        MYSQLDB.cur.execute('SET foreign_key_checks=1')
+        MYSQLDB.cur.execute('SET unique_checks=1')
         MYSQLDB.cur.close()
         MYSQLDB.conn.close()
         logger.info('MySQL connector and cursor closed !')
