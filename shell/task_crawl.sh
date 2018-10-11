@@ -15,14 +15,15 @@ function check(){
     fi
 }
 
+if [ -f ${STOPFILE} ]
+then
+    rm ${STOPFILE}
+fi
 
-echo 0 > ${STOPFILE}
 while true
 do
     cd ${SHELLPATH}
-    line=$(head -1 stop_crawl.flag)
-    echo ${line}
-    if [ 1 -eq ${line} ]
+    if [ -f ${STOPFILE} ]
     then
         exit 0
     fi
