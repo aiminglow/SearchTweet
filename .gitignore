@@ -118,6 +118,7 @@ venv.bak/
 # log folder
 log/
 shell/nohup.out
+shell/stop_crawl.flag
 
 # dev settings file
 settingsdev.py
