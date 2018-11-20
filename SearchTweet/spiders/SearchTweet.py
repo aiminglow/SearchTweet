@@ -53,7 +53,7 @@ class SearchTweet(CrawlSpider):
         logger.info('Prepare to crawl THE FIRST PAGE with url: ' + url)
         yield  http.Request(url, 
                             meta={'proxy' : 'http://127.0.0.1:8118'},
-                            headers=settings['DEFAULT_REQUEST_HEADERS'],
+                            #headers=settings['DEFAULT_REQUEST_HEADERS'],
                             #cookies=settings['DEFAULT_COOKIE'],
                             callback=self.parse_page)
     
@@ -69,7 +69,7 @@ class SearchTweet(CrawlSpider):
         logger.debug('Prepare to crawl A NEW PAGE with URL: ' + url)
         yield http.Request(url,
                             meta={'proxy' : 'http://127.0.0.1:8118'},
-                            headers=settings['DEFAULT_REQUEST_HEADERS'],
+                            #headers=settings['DEFAULT_REQUEST_HEADERS'],
                             #cookies=settings['DEFAULT_COOKIE'],
                             callback=self.parse_page)
             

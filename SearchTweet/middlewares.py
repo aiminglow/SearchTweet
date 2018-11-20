@@ -6,6 +6,8 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import random
+from scrapy.conf import settings
 # from scrapy.dupefilter import RFPDupeFilter
 # from SearchTweet.utils import MYSQLDB, update_status
 
@@ -117,3 +119,11 @@ class SearchtweetDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class RandomUserAgentMiddleware(object):
+
+    # 随机设置 User-agent
+    def process_request( self, request, spider ):
+        ua = random.choice(settings['USERAGENTLIST'])
+        if ua:
+            request.headers.setdefault( 'User-Agent', ua)

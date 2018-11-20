@@ -63,6 +63,15 @@ DEFAULT_REQUEST_HEADERS = {
     'Upgrade-Insecure-Requests':'1',
     'Content-Type':'application/x-www-form-urlencoded'}
 
+UserAgent_List = [ "your useragent1", "your useragent2" ]
+
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware' : None,
+    'SearchTweet.middlewares.RandomUserAgentMiddleware' : 400,
+    #'SearchTweet.middlewares.SearchtweetSpiderMiddleware' : 100,
+    #'SearchTweet.middlewares.SearchtweetDownloaderMiddleware' : 100,
+}
+
 DEFAULT_COOKIE = ['_twitter_sess=you cookie']
 
 
