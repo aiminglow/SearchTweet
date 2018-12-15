@@ -123,7 +123,6 @@ class SaveToMySqlPipeline(object):
         update_status(task_id=int(spider.task_msg['id']), status=1)
         logger.info('TASK: Task id='+str(spider.task_msg['id'])+' keywords='+spider.task_msg['keywords']+' status has been modify to [1]')
         MYSQLDB.close()
-        logger.info('CLOSE: There is a duplicate url, prepare to close spider')
         
 class DefaultValuesPipeline(object):
     def process_item(self, item, spider):
