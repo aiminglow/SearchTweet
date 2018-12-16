@@ -106,6 +106,9 @@ venv.bak/
 
 # vscode setting
 .vscode/
+# idea setting
+.idea/
+*.iml
 
 # test code. store in the other primary repository
 # test/
