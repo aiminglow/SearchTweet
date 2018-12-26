@@ -9,25 +9,48 @@ from mysql.connector import errorcode
 
 logger = logging.getLogger(__name__)
 
-class MYSQLDB(object):
-    user = settings['MYSQLUSER']
-    pwd = settings['MYSQLPWD']
-    conn = connect(auth_plugin='mysql_native_password', user=user, password=pwd, host='localhost', database='spider_data', buffered=True)
-    cur = conn.cursor(dictionary=True)
+class MySqlUtil(object):
+
+    def __init__(self, con_now=False):
+        if con_now:
+            self.connect()
+            
+    def connect(self):
+        self.conn = connect(auth_plugin='mysql_native_password', user=settings['MYSQLUSER'], password=settings['MYSQLPWD']\
+                    , host='localhost', database='spider_data', buffered=True)
+        self.cur = self.conn.cursor(dictionary=True)
     
+    def insert_before(self):
+        self.cur.execute('SET autocommit=0')
+        self.cur.execute('SET unique_checks=0')
+        self.cur.execute('SET foreign_key_checks=0')
 
-    cur.execute('SET autocommit=0')
-    cur.execute('SET unique_checks=0')
-    cur.execute('SET foreign_key_checks=0')
+    def insert_after(self):
+        self.conn.commit()
+        self.cur.execute('SET foreign_key_checks=1')
+        self.cur.execute('SET unique_checks=1')
+        self.cur.close()
+        self.conn.close()
+        logger.debug('MySql commit and connector/cursor close !')
 
-    @staticmethod
-    def close():
-        MYSQLDB.cur.execute('SET foreign_key_checks=1')
-        MYSQLDB.cur.execute('SET unique_checks=1')
-        MYSQLDB.cur.close()
-        MYSQLDB.conn.close()
-        logger.info('MySQL connector and cursor closed !')
+    def commit(self):
+        self.conn.commit()
+    
+    def close(self):
+        self.cur.close()
+        self.conn.close()
 
+    # 更新taskqueue表的状态
+    def update_status(self, task_id=None, keywords=None, status=1):
+        assert task_id is not None, "[%s] task_id can not be None Type!" % (self.update_status.__name__)
+        update_sql = 'update taskqueue set status=%s where id=%s'
+        try:
+            self.cur.execute(update_sql, (status, task_id))
+            self.insert_after()
+        except mysql.connector.Error as err:
+            logger.info('Update task status id=%s status=%s failed cause: %s' % (status, task_id, str(err)))
+        else:
+            logger.info('TASK: Task id='+str(task_id)+' keywords='+keywords+' status has been modify to [' + str(status) + ']')
 
 
 def mkdirs(dirs):
@@ -42,44 +65,24 @@ def mkdirs(dirs):
 !!! 方法需要改成，可选填参数，从而适应第一次get_keyword和上一个爬虫爬完了，需要更改task表状态然后在get_keyword
 '''
 def get_keyword():
-    cur = MYSQLDB.cur
-
+    msu = MySqlUtil(True)
     query_keywords = 'select id,keywords,`table_name`,begintime,endtime,`now`,`status` from taskqueue where id=(select min(id) from taskqueue where status!=1 and status!=2)'
     try:
-        cur.execute(query_keywords)
-        result = cur.fetchall()
-        if(None != result):
+        msu.cur.execute(query_keywords)
+        result = msu.cur.fetchall()
+        if result is not None:
             # 如果能够查到结果，将结果集list的第一条的状态设置为2
-            update_status(task_id=result[0]['id'], status=2)
+            msu.update_status(result[0]['id'], result[0]['keywords'], status=2)
             return result[0]       #返回值是result[0]，类型为dict，而不是result，类型为list
         else:
             logger.info('STOP: No Task, Stop Crawl.')
             return None
+        msu.close()
     except mysql.connector.Error as err:
+        msu.close()
         logger.info('Select keyword from task error: ' + str(err))
-        return None
-
-
-# 更新taskqueue表的状态
-def update_status(task_id=None, status=1):
-    conn = MYSQLDB.conn
-    cur = MYSQLDB.cur
-    if(None != task_id):
-        if not isinstance(task_id, int):
-            task_id = int(task_id)
-        if not isinstance(status, int):
-            status = int(status)
-    update_sql = 'update taskqueue set status=%s where id=%s'
-    try:
-        cur.execute(update_sql, (status, task_id))
-        conn.commit()
-    except mysql.connector.Error as err:
-        logger.info('Update task status id=%s status=%s failed cause: %s' % (status, task_id, str(err)))
-    else:
-        logger.debug('Update task status id=%s status=%s ' % (status, task_id))
 
 # 给spider类提供的方法：换掉字符串里面的单引号、双引号和反斜杠
 def escape_text(s:str):
     s = s.replace('\\', '\\\\').replace("'", "\\\'").replace('"', '\\\"')
     return s
-    
