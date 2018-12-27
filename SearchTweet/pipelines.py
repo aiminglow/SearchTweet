@@ -61,7 +61,7 @@ class SaveToMySqlPipeline(object):
         if self.count == 0:
             self.msu.connect()
             self.msu.insert_before()
-        if self.count < self.MYSQLCACHE:
+        if self.count <= self.MYSQLCACHE:
             insert_method(self)
             self.count += 1
         elif self.count > self.MYSQLCACHE:
