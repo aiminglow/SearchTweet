@@ -8,7 +8,7 @@ import logging
 import json
 import mysql.connector
 from mysql.connector import errorcode
-from SearchTweet.utils import MySqlUtil
+from SearchTweet.utils import MySqlUtil, update_status
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class SaveToMySqlPipeline(object):
             logger.error("Item is neither tweet nor user !")
 
     def close_spider(self, spider):
-        self.msu.update_status(int(spider.task_msg['id']), spider.task_msg['keywords'], 1)
+        update_status(int(spider.task_msg['id']), spider.task_msg['keywords'], 1)
         
 class DefaultValuesPipeline(object):
     def process_item(self, item, spider):

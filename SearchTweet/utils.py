@@ -40,17 +40,6 @@ class MySqlUtil(object):
         self.cur.close()
         self.conn.close()
 
-    # 更新taskqueue表的状态
-    def update_status(self, task_id=None, keywords=None, status=1):
-        assert task_id is not None, "[%s] task_id can not be None Type!" % (self.update_status.__name__)
-        update_sql = 'update '+ settings['TASK_TABLE'] +' set status=%s where id=%s'
-        try:
-            self.cur.execute(update_sql, (status, task_id))
-            self.insert_after()
-        except mysql.connector.Error as err:
-            logger.info('Update task status id=%s status=%s failed cause: %s' % (status, task_id, str(err)))
-        else:
-            logger.info('TASK: Task id='+str(task_id)+' keywords='+keywords+' status has been modify to [' + str(status) + ']')
 
 
 def mkdirs(dirs):
@@ -58,6 +47,17 @@ def mkdirs(dirs):
     if not os.path.exists(dirs):
         os.makedirs(dirs)
 
+# 更新taskqueue表的状态
+def update_status(task_id=None, keywords=None, status=1, msu=MySqlUtil(True)):
+    assert task_id is not None, "[function update_status] task_id can not be None Type!"
+    update_sql = 'update '+ settings['TASK_TABLE'] +' set status=%s where id=%s'
+    try:
+        msu.cur.execute(update_sql, (status, task_id))
+        msu.insert_after()
+    except mysql.connector.Error as err:
+        logger.info('Update task status id=%s status=%s failed cause: %s' % (status, task_id, str(err)))
+    else:
+        logger.info('TASK: Task id='+str(task_id)+' keywords='+keywords+' status has been modify to [' + str(status) + ']')
 
 '''
 从taskqueue表查找一条状态status不为1：已经查找完成 或 2：正在查找，被锁住 的记录；
@@ -72,7 +72,7 @@ def get_keyword():
         result = msu.cur.fetchall()
         if result is not None:
             # 如果能够查到结果，将结果集list的第一条的状态设置为2
-            msu.update_status(result[0]['id'], result[0]['keywords'], status=2)
+            update_status(result[0]['id'], result[0]['keywords'], 2, msu)
             return result[0]       #返回值是result[0]，类型为dict，而不是result，类型为list
         else:
             logger.info('STOP: No Task, Stop Crawl.')
