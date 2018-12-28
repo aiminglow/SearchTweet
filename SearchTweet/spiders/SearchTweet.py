@@ -43,9 +43,9 @@ class SearchTweet(CrawlSpider):
         # 如果task表的now字段不是默认值，而是修改过的，说明之前运行在这一条中断了，继续搜索这一条
         if('1980-01-01' != task_now):
             # 搜索的keywords前面加上 $ 符号，能够更精准的搜索股票相关的tweet
-            return tmp % ('$' + task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task_now)
+            return tmp % (task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task_now)
         else:    
-            return tmp % ('$' + task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
+            return tmp % (task['keywords'], task['begintime'].strftime('%Y-%m-%d'), task['endtime'].strftime('%Y-%m-%d'))
 
 
     def start_requests(self):

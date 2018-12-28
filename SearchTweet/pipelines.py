@@ -25,7 +25,7 @@ class SaveToMySqlPipeline(object):
         tweet_id = item['ID']
         if(None == tweet_id):
             return
-        insert_tweet_sql = "insert ignore into "+ spider.task_msg['table_name']\
+        insert_tweet_sql = "insert ignore into "+ settings['TWEET_TABLE']\
                            + "(keywords,tweet_id,url,`datetime`,`text`,user_id,nbr_retweet,nbr_favorite,nbr_reply,is_reply,is_retweet,images,sumfullcard,sumurl) "\
                            + "values('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},{8},{9},{10},'{11}','{12}','{13}')"
         insert_tweet_sql = insert_tweet_sql.format(query, tweet_id, item["url"], item["datetime"], item["text"], item["user_id"], item["nbr_retweet"]\
@@ -44,7 +44,7 @@ class SaveToMySqlPipeline(object):
         user_id = item['ID']
         if(None == item["ID"]):
             return None
-        insert_user_sql = "insert ignore into tweetuser(user_id,`name`,screen_name,avatar) "
+        insert_user_sql = "insert ignore into "+ settings["USER_TABLE"] +" (user_id,`name`,screen_name,avatar) "
         insert_user_sql += "values('%s','%s','%s','%s')"
         insert_user_sql = insert_user_sql % (item["ID"], item["name"], item["screen_name"], item["avatar"])
 
