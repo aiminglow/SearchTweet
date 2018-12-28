@@ -17,7 +17,7 @@ class MySqlUtil(object):
             
     def connect(self):
         self.conn = connect(auth_plugin='mysql_native_password', user=settings['MYSQLUSER'], password=settings['MYSQLPWD']\
-                    , host='localhost', database='spider_data', buffered=True)
+                    , host=settings['MYSQLHOST'], port=settings['MYSQLPORT'], database=settings['MYSQLDB'], buffered=True)
         self.cur = self.conn.cursor(dictionary=True)
     
     def insert_before(self):
@@ -43,7 +43,7 @@ class MySqlUtil(object):
     # 更新taskqueue表的状态
     def update_status(self, task_id=None, keywords=None, status=1):
         assert task_id is not None, "[%s] task_id can not be None Type!" % (self.update_status.__name__)
-        update_sql = 'update taskqueue set status=%s where id=%s'
+        update_sql = 'update '+ settings['TASK_TABLE'] +' set status=%s where id=%s'
         try:
             self.cur.execute(update_sql, (status, task_id))
             self.insert_after()
@@ -66,7 +66,7 @@ def mkdirs(dirs):
 '''
 def get_keyword():
     msu = MySqlUtil(True)
-    query_keywords = 'select id,keywords,`table_name`,begintime,endtime,`now`,`status` from taskqueue where id=(select min(id) from taskqueue where status!=1 and status!=2)'
+    query_keywords = 'select id,keywords,begintime,endtime,`now`,`status` from '+ settings['TASK_TABLE'] +' where id=(select min(id) from taskqueue where status!=1 and status!=2)'
     try:
         msu.cur.execute(query_keywords)
         result = msu.cur.fetchall()

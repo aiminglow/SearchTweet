@@ -1,4 +1,4 @@
-create table tweet_keywords_begintime_endtime (
+create table stockinfo (
 id int(13) primary key not null auto_increment comment '主键，自增',
 keywords varchar(50) not null comment '查询这条tweet时使用的关键词和时间区间的组合',
 tweet_id char(20) not null comment 'tweet的唯一id',
@@ -16,6 +16,3 @@ sumfullcard varchar(80) comment 'twitter.com将tweet中包含的summary card单�
 sumurl varchar(80) comment '点击summary card跳转到的url',
 unique index `tweet_id_unique_index` (`tweet_id`) comment 'tweet_id的唯一索引，用来查重')
 engine=InnoDB DEFAULT CHARSET=utf8mb4;
-
-insert into searchtweet(keywords,tweet_id,url,`datetime`,`text`,user_id,nbr_retweet,nbr_favorite,nbr_reply,is_reply,is_retweet,images,sumfullcard,sumurl) 
-values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
