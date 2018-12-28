@@ -43,10 +43,17 @@ ITEM_PIPELINES = {
 
 UserAgent_List = [ "your useragent1", "your useragent2" ]
 
+PROXIES = [
+    {'ip_port':'127.0.0.1:8118', 'user_pwd':None},
+]
+
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware' : None,
     'SearchTweet.middlewares.RandomUserAgentMiddleware' : 400,
+    'SearchTweet.middlewares.ProxyMiddleware' : 390
 }
+
+DEFAULT_REQUEST_HEADERS = {" ": " "}
 
 # settings for where to save data on disk
 SAVE_TWEET_PATH = './Data/tweet/'

@@ -51,11 +51,7 @@ class SearchTweet(CrawlSpider):
     def start_requests(self):
         url = self.url % (quote(self.query), '')
         logger.info('Prepare to crawl THE FIRST PAGE with keywords: ' + self.query)
-        yield  http.Request(url, 
-                            meta={'proxy' : 'http://127.0.0.1:8118'},
-                            #headers=settings['DEFAULT_REQUEST_HEADERS'],
-                            #cookies=settings['DEFAULT_COOKIE'],
-                            callback=self.parse_page)
+        yield  http.Request(url, callback=self.parse_page)
     
     def parse_page(self, response):
         # handle current page
@@ -67,11 +63,7 @@ class SearchTweet(CrawlSpider):
         min_position = data['min_position']
         url = self.url % (quote(self.query), min_position)            
         logger.debug('Prepare to crawl A NEW PAGE with keywords[' + self.query + '] and min_position[' + min_position + ']')
-        yield http.Request(url,
-                            meta={'proxy' : 'http://127.0.0.1:8118'},
-                            #headers=settings['DEFAULT_REQUEST_HEADERS'],
-                            #cookies=settings['DEFAULT_COOKIE'],
-                            callback=self.parse_page)
+        yield http.Request(url, callback=self.parse_page)
             
         
     def prase_tweets_block(self, html_page):
