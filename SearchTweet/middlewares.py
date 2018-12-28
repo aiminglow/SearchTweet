@@ -4,6 +4,8 @@
 import random
 from scrapy.conf import settings
 import base64
+import time
+from datetime import datetime
 
 
 class ProxyMiddleware(object):
@@ -26,3 +28,7 @@ class RandomUserAgentMiddleware(object):
         ua = random.choice(settings['USERAGENTLIST'])
         if ua:
             request.headers.setdefault('User-Agent', ua)
+            if '3' == datetime.now().strftime('%S')[0:1]:
+                time.sleep(random.randint(4, 9))
+            else:
+                time.sleep(random.randint(0, 3))
