@@ -1,41 +1,33 @@
 # -*- coding: utf-8 -*-
 
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://doc.scrapy.org/en/latest/topics/items.html
 
 from scrapy import Item, Field
 
 
 class Tweet(Item):
-    ID = Field()       # tweet id
-    url = Field()      # tweet url
-    datetime = Field() # post time
-    text = Field()     # text content
-    user_id = Field()  # user id
-    # usernameTweet = Field() # username of tweet
+    ID = Field()
+    url = Field()
+    datetime = Field()
+    text = Field()
+    user_id = Field()
 
-    nbr_retweet = Field()  # nbr of retweet
-    nbr_favorite = Field() # nbr of favorite
-    nbr_reply = Field()    # nbr of reply
+    nbr_retweet = Field()
+    nbr_favorite = Field()
+    nbr_reply = Field()
 
-    is_reply = Field()   # boolean if the tweet is a reply or not
-    is_retweet = Field() # boolean if the tweet is just a retweet of another tweet
+    is_reply = Field()
+    is_retweet = Field()
 
-    # has_image = Field() # True/False, whether a tweet contains images
-    images = Field()    # a list of image urls, empty if none
+    images = Field()
 
-    # has_video = Field() # True/False, whether a tweet contains videos
-    # videos = Field()    # a list of video urls
+    # videos = Field()
 
-    # has_summary = Field() # True/False,ahether atweet contains summarycard
-    sumfullcard = Field() # a list of summarycard's title,summary,domain,picture
-    sumurl = Field()      # a list of summarycard's url
+    sumfullcard = Field()
+    sumurl = Field()
 
 
 class User(Item):
-    ID = Field()            # user id
-    name = Field()          # user name
-    screen_name = Field()   # user screen name
-    avatar = Field()        # avator url
+    ID = Field()
+    name = Field()
+    screen_name = Field()
+    avatar = Field()
